@@ -1,0 +1,55 @@
+seed: 42
+
+data:
+  decouple_kv: true
+  length: 256
+  n_pairs: 2
+  num_values: 64
+  train_size: 3000
+  val_size: 200
+  vocab_extra: 96
+
+model:
+  emb_dim: 64
+  hid_dim: 128
+  mem_dim: 256
+
+memory:
+  n_slots: 256
+  k_top: 8
+
+train:
+  batch_size: 32
+  lr: 0.003
+  wd: 0.01
+  epochs: 2
+  lr_after_warm_factor: 0.5
+
+emma:
+  deq_max_iter: 8
+  oracle_write: false
+  warm_start_epochs: 0
+  oracle_mix_ramp_epochs: 3
+  oracle_mix_min: 0.4
+  mem_into_deq: true
+  mem_scale: 0.5
+  mem_scale_min: 0.0
+  logit_scale_max: 5.0
+  nce_gate_write_cos: 0.0
+  nce_gate_write_cos_off: 0.0
+  nce_lambda_ramp_epochs: 1
+  nce_ema_beta: 0.8
+  nce_gate_read_cos: null
+  nce_gate_read_cos_off: null
+  nce_force_open_epoch: 1
+  nce_read_ema_beta: 0.8
+  nce_min_open_epochs: 1
+  nce_close_patience: 1
+  nce_sticky_after_ramp: true
+  nce_temperature: 0.1
+
+loss:
+  lambda_pred_ce: 0.3
+  lambda_write_cos: 0.2
+  lambda_write_nce: 0.1
+  lambda_nce: 0.1

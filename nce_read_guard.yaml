@@ -1,0 +1,10 @@
+emma:
+  nce_gate_require_read: true
+  nce_gate_read_patience: 2
+  nce_lambda_pause_below_read: true
+  oracle_mix_post_gate_epochs: 3
+  oracle_mix_post_gate_min: 0.25
+  oracle_mix_post_gate_start: 0.6
+
+logging:
+  per_epoch_extended: true

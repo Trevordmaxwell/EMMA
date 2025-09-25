@@ -1,0 +1,8 @@
+data:
+  train_size: 512
+  val_size: 64
+train:
+  epochs: 3
+  batch_size: 16
+emma:
+  deq_max_iter: 6

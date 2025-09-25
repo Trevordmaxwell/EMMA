@@ -1,0 +1,16 @@
+emma:
+  mem_into_deq: true
+  mem_scale: 0.6
+  read_cleanup_topk: 3
+  enable_read_cleanup: true
+read:
+  cleanup_mode: softmax
+  cleanup_temp: 0.7
+loss:
+  lambda_pred_ce: 0.3
+  lambda_write_cos: 0.2
+  lambda_write_nce: 0.1
+reg:
+  addr_entropy_weight: 0.01
+train:
+  epochs: 6

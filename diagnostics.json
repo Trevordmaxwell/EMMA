@@ -1,0 +1,411 @@
+{
+  "configs": {
+    "configs/cpu_len256_nce_force_open.yaml": {
+      "nce_lambda_ramp_epochs": 1,
+      "nce_force_open_epoch": 1,
+      "nce_min_open_epochs": 1,
+      "nce_close_patience": 1,
+      "nce_sticky_after_ramp": true,
+      "nce_gate_write_cos": 0.0,
+      "nce_gate_write_cos_off": 0.0,
+      "nce_gate_read_cos": null,
+      "nce_gate_read_cos_off": null,
+      "nce_temperature": 0.1,
+      "lambda_write_nce": 0.1
+    },
+    "configs/cpu_len256_nceA.yaml": {
+      "nce_lambda_ramp_epochs": 4,
+      "nce_force_open_epoch": 2,
+      "nce_min_open_epochs": 4,
+      "nce_close_patience": 2,
+      "nce_sticky_after_ramp": true,
+      "nce_gate_write_cos": 0.12,
+      "nce_gate_write_cos_off": 0.07,
+      "nce_gate_read_cos": 0.7,
+      "nce_gate_read_cos_off": null,
+      "nce_temperature": 0.1,
+      "lambda_write_nce": 0.1
+    },
+    "configs/cpu_len512_nceA.yaml": {
+      "nce_lambda_ramp_epochs": 4,
+      "nce_force_open_epoch": 2,
+      "nce_min_open_epochs": 4,
+      "nce_close_patience": 2,
+      "nce_sticky_after_ramp": true,
+      "nce_gate_write_cos": 0.12,
+      "nce_gate_write_cos_off": 0.07,
+      "nce_gate_read_cos": 0.7,
+      "nce_gate_read_cos_off": null,
+      "nce_temperature": 0.1,
+      "lambda_write_nce": 0.1
+    },
+    "configs/cpu_len512_n4_nceA.yaml": {
+      "nce_lambda_ramp_epochs": 4,
+      "nce_force_open_epoch": 2,
+      "nce_min_open_epochs": 4,
+      "nce_close_patience": 2,
+      "nce_sticky_after_ramp": true,
+      "nce_gate_write_cos": 0.12,
+      "nce_gate_write_cos_off": 0.07,
+      "nce_gate_read_cos": 0.7,
+      "nce_gate_read_cos_off": null,
+      "nce_temperature": 0.1,
+      "lambda_write_nce": 0.1
+    }
+  },
+  "runs": {
+    "nce_force_open": {
+      "csv": {
+        "present": true,
+        "headers": [
+          "epoch",
+          "train_loss",
+          "train_acc",
+          "val_loss",
+          "val_acc",
+          "avg_fp_iters",
+          "read_cos_last",
+          "write_cos_last",
+          "topk_hit_rate",
+          "addr_entropy_last",
+          "residual_norm_last",
+          "lambda_nce",
+          "nce_ema_write_cos",
+          "nce_read_ema_cos"
+        ],
+        "missing_headers": [],
+        "lambda_nce_min": 0.2,
+        "lambda_nce_max": 0.2,
+        "lambda_nce_nonzero_epochs": [
+          2
+        ]
+      },
+      "log": {
+        "metrics": {
+          "nce_temperature": 0.1,
+          "lambda_nce_current_epoch": 0.1,
+          "lambda_nce_in_train": 0.1,
+          "aux_nce_loss_epoch_mean": 0.058562,
+          "gate_state_before": 1.0,
+          "gate_state_after": 1.0,
+          "nce_gate_epoch": 1.0,
+          "nce_ema_write_cos": 0.00269,
+          "nce_read_ema_cos": 0.169896,
+          "deq_last_residual": 1.175049
+        },
+        "gate_events": [],
+        "lambda_pairs": [
+          {
+            "epoch": 1,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          },
+          {
+            "epoch": 2,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "nce_gated": {
+      "csv": {
+        "present": true,
+        "headers": [
+          "epoch",
+          "train_loss",
+          "train_acc",
+          "val_loss",
+          "val_acc",
+          "avg_fp_iters",
+          "read_cos_last",
+          "write_cos_last",
+          "topk_hit_rate",
+          "addr_entropy_last",
+          "residual_norm_last",
+          "lambda_nce",
+          "nce_ema_write_cos",
+          "nce_read_ema_cos"
+        ],
+        "missing_headers": [],
+        "lambda_nce_min": 0.0,
+        "lambda_nce_max": 0.1,
+        "lambda_nce_nonzero_epochs": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "log": {
+        "metrics": {
+          "nce_temperature": 0.1,
+          "lambda_nce_current_epoch": 0.1,
+          "lambda_nce_in_train": 0.1,
+          "aux_nce_loss_epoch_mean": 0.07339,
+          "gate_state_before": 1.0,
+          "gate_state_after": 1.0,
+          "nce_gate_epoch": 2.0,
+          "nce_ema_write_cos": -0.000436,
+          "nce_read_ema_cos": 0.340442,
+          "deq_last_residual": 2.296387
+        },
+        "gate_events": [],
+        "lambda_pairs": [
+          {
+            "epoch": 1,
+            "lambda_nce_current_epoch": 0.0,
+            "lambda_nce_in_train": 0.0
+          },
+          {
+            "epoch": 2,
+            "lambda_nce_current_epoch": 0.025,
+            "lambda_nce_in_train": 0.025
+          },
+          {
+            "epoch": 3,
+            "lambda_nce_current_epoch": 0.05,
+            "lambda_nce_in_train": 0.05
+          },
+          {
+            "epoch": 4,
+            "lambda_nce_current_epoch": 0.075,
+            "lambda_nce_in_train": 0.075
+          },
+          {
+            "epoch": 5,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          },
+          {
+            "epoch": 6,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "nce_gated_512": {
+      "csv": {
+        "present": true,
+        "headers": [
+          "epoch",
+          "train_loss",
+          "train_acc",
+          "val_loss",
+          "val_acc",
+          "avg_fp_iters",
+          "read_cos_last",
+          "write_cos_last",
+          "topk_hit_rate",
+          "addr_entropy_last",
+          "residual_norm_last",
+          "lambda_nce",
+          "nce_ema_write_cos",
+          "nce_read_ema_cos"
+        ],
+        "missing_headers": [],
+        "lambda_nce_min": 0.0,
+        "lambda_nce_max": 0.1,
+        "lambda_nce_nonzero_epochs": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "log": {
+        "metrics": {
+          "nce_temperature": 0.1,
+          "lambda_nce_current_epoch": 0.1,
+          "lambda_nce_in_train": 0.1,
+          "aux_nce_loss_epoch_mean": 0.018386,
+          "gate_state_before": 1.0,
+          "gate_state_after": 1.0,
+          "nce_gate_epoch": 2.0,
+          "nce_ema_write_cos": -0.000376,
+          "nce_read_ema_cos": 0.418608,
+          "deq_last_residual": 3.515625
+        },
+        "gate_events": [],
+        "lambda_pairs": [
+          {
+            "epoch": 1,
+            "lambda_nce_current_epoch": 0.0,
+            "lambda_nce_in_train": 0.0
+          },
+          {
+            "epoch": 2,
+            "lambda_nce_current_epoch": 0.025,
+            "lambda_nce_in_train": 0.025
+          },
+          {
+            "epoch": 3,
+            "lambda_nce_current_epoch": 0.05,
+            "lambda_nce_in_train": 0.05
+          },
+          {
+            "epoch": 4,
+            "lambda_nce_current_epoch": 0.075,
+            "lambda_nce_in_train": 0.075
+          },
+          {
+            "epoch": 5,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          },
+          {
+            "epoch": 6,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          }
+        ],
+        "warnings": []
+      }
+    },
+    "nce_gated_len512_n4": {
+      "csv": {
+        "present": true,
+        "headers": [
+          "epoch",
+          "train_loss",
+          "train_acc",
+          "val_loss",
+          "val_acc",
+          "avg_fp_iters",
+          "read_cos_last",
+          "write_cos_last",
+          "topk_hit_rate",
+          "addr_entropy_last",
+          "residual_norm_last",
+          "lambda_nce",
+          "nce_ema_write_cos",
+          "nce_read_ema_cos"
+        ],
+        "missing_headers": [],
+        "lambda_nce_min": 0.0,
+        "lambda_nce_max": 0.1,
+        "lambda_nce_nonzero_epochs": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ]
+      },
+      "log": {
+        "metrics": {
+          "nce_temperature": 0.1,
+          "lambda_nce_current_epoch": 0.1,
+          "lambda_nce_in_train": 0.1,
+          "aux_nce_loss_epoch_mean": 0.014973,
+          "gate_state_before": 1.0,
+          "gate_state_after": 1.0,
+          "nce_gate_epoch": 2.0,
+          "nce_ema_write_cos": -0.00019,
+          "nce_read_ema_cos": 0.419278,
+          "deq_last_residual": 3.1875
+        },
+        "gate_events": [],
+        "lambda_pairs": [
+          {
+            "epoch": 1,
+            "lambda_nce_current_epoch": 0.0,
+            "lambda_nce_in_train": null
+          },
+          {
+            "epoch": 2,
+            "lambda_nce_current_epoch": 0.0,
+            "lambda_nce_in_train": 0.0
+          },
+          {
+            "epoch": 3,
+            "lambda_nce_current_epoch": 0.025,
+            "lambda_nce_in_train": 0.025
+          },
+          {
+            "epoch": 4,
+            "lambda_nce_current_epoch": 0.05,
+            "lambda_nce_in_train": 0.0
+          },
+          {
+            "epoch": 5,
+            "lambda_nce_current_epoch": 0.025,
+            "lambda_nce_in_train": 0.05
+          },
+          {
+            "epoch": 6,
+            "lambda_nce_current_epoch": 0.075,
+            "lambda_nce_in_train": 0.025
+          },
+          {
+            "epoch": 7,
+            "lambda_nce_current_epoch": 0.05,
+            "lambda_nce_in_train": 0.075
+          },
+          {
+            "epoch": 8,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.05
+          },
+          {
+            "epoch": 9,
+            "lambda_nce_current_epoch": 0.075,
+            "lambda_nce_in_train": 0.1
+          },
+          {
+            "epoch": 10,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.075
+          },
+          {
+            "epoch": 11,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          },
+          {
+            "epoch": 12,
+            "lambda_nce_current_epoch": 0.1,
+            "lambda_nce_in_train": 0.1
+          }
+        ],
+        "warnings": [
+          {
+            "info_nce_passthrough_mismatch": [
+              4
+            ]
+          },
+          {
+            "gate_deadline_miss": {
+              "expected_by": 2,
+              "observed": 3
+            }
+          }
+        ]
+      }
+    }
+  },
+  "warnings": [
+    {
+      "run": "nce_gated_len512_n4",
+      "issue": {
+        "info_nce_passthrough_mismatch": [
+          4
+        ]
+      }
+    },
+    {
+      "run": "nce_gated_len512_n4",
+      "issue": {
+        "gate_deadline_miss": {
+          "expected_by": 2,
+          "observed": 3
+        }
+      }
+    }
+  ]
+}

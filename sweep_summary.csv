@@ -1,0 +1,4 @@
+avg_fp_iters,best_val_acc,best_val_acc_postwarm,final_val_loss,run_tag,walltime_sec
+5.25,0.895,0.885,3.141257,cpu_len256_seed42,249.486
+5.25,0.89,0.86,3.162732,cpu_len256_seed43,249.234
+5.25,0.93,0.925,3.129225,cpu_len256_seed44,262.469

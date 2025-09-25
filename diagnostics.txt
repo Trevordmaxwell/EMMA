@@ -1,0 +1,2 @@
+nce_gated_len512_n4: {'info_nce_passthrough_mismatch': [4]}
+nce_gated_len512_n4: {'gate_deadline_miss': {'expected_by': 2, 'observed': 3}}

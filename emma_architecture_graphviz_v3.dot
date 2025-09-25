@@ -1,0 +1,51 @@
+digraph EMMA_Diagram {
+  graph [rankdir=LR, splines=polyline, nodesep=1.0, ranksep=1.1, bgcolor="white", fontname="Helvetica"];
+  node  [fontname="Helvetica", fontsize=12, style=filled, color="#1b4f72", fontcolor="#1b4f72", fillcolor="white", width=1.2, height=0.8];
+  edge  [fontname="Helvetica", fontsize=11, color="#1b4f72", arrowsize=0.9, penwidth=1.2];
+
+  subgraph cluster_inputs {
+    label=""; color=none;
+    xt    [label="x_t", shape=ellipse, fillcolor="#d6eaf8"];
+    htm1  [label="h_{t-1}", shape=ellipse, fillcolor="#d6eaf8"];
+  }
+
+  mamba [label="SSM / Mamba\nBackbone", shape=box, style="rounded,filled", fillcolor="#e8f6f3", width=2.0, height=1.1];
+  kt    [label="k_t", shape=circle, width=0.7, height=0.7, fillcolor="#fdebd0", color="#eb984e", fontcolor="#eb984e"];
+  memory[label="VSA Memory\nM", shape=box, style="rounded,filled", fillcolor="#fcf3cf", color="#b7950b", fontcolor="#b7950b", width=2.0, height=1.1];
+  rt    [label="r_t", shape=ellipse, fillcolor="#d6eaf8", width=1.1, height=0.75];
+  deq   [label="DEQ Block\n(Fixed-point Solver)", shape=box, style="rounded,filled", fillcolor="#e8f8f5", width=2.4, height=1.2];
+  zstar [label="z*", shape=ellipse, fillcolor="#d6eaf8"];
+  yt    [label="y_t", shape=ellipse, fillcolor="#d6eaf8"];
+  ht    [label="h_t", shape=ellipse, fillcolor="#d6eaf8"];
+  gate  [label="Gate", shape=diamond, style="filled", fillcolor="#f5eef8", color="#8e44ad", fontcolor="#8e44ad", width=1.1, height=0.85];
+
+  deq_loop [label="Fixed-point\niterations", shape=box, style="rounded", width=1.8, height=0.9, color="#5d6d7e", fontcolor="#5d6d7e", fillcolor="#eef0f5"];
+  htplus [label="$h_{t+1}$", shape=ellipse, fillcolor="#eef2f7", color="#5d6d7e", fontcolor="#5d6d7e", width=1.1, height=0.75];
+
+  {rank=same; xt; htm1;}
+  {rank=same; kt; gate;}
+  {rank=same; memory; rt;}
+  {rank=same; yt; ht; htplus;}
+
+  xt -> mamba   [label="current word", fontcolor="#1b4f72", len=1.2];
+  htm1 -> mamba [label="previous state", fontcolor="#1b4f72", len=1.2];
+
+  mamba -> kt   [label="key", fontcolor="#eb984e", color="#eb984e", len=1.0];
+  kt -> memory  [label="query", fontcolor="#eb984e", color="#eb984e", len=0.9];
+  memory -> rt  [label="retrieved", fontcolor="#b7950b", color="#b7950b", len=0.9];
+  rt -> deq     [label="context", fontcolor="#1b4f72", color="#1b4f72", len=1.0];
+
+  xt -> deq     [label="$x_t$", fontcolor="#1b4f72", color="#1b4f72", constraint=false, len=1.8];
+  mamba -> deq  [label="state injection", style=dashed, color="#1b4f72", fontcolor="#1b4f72", constraint=false, len=1.6];
+
+  deq -> deq_loop [color="#5d6d7e", fontcolor="#5d6d7e", arrowsize=0.75, len=1.0];
+  deq_loop -> deq [color="#5d6d7e", fontcolor="#5d6d7e", arrowsize=0.75, len=1.0];
+
+  deq -> zstar  [label="solved state", len=1.3];
+  zstar -> yt   [label="readout", len=1.1];
+  zstar -> ht   [label="state update", len=1.1];
+  ht -> htplus  [label="feeds next step", color="#5d6d7e", fontcolor="#5d6d7e", arrowsize=0.75, len=1.1];
+
+  zstar -> gate  [label="Optional write", style=dashed, color="#8e44ad", fontcolor="#8e44ad", constraint=false, len=1.0];
+  gate -> memory [label="write", style=dashed, color="#8e44ad", fontcolor="#8e44ad", constraint=false, len=1.0];
+}

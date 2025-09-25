@@ -1,0 +1,26 @@
+[
+  {
+    "avg_fp_iters": 5.25,
+    "best_val_acc": 0.895,
+    "best_val_acc_postwarm": 0.885,
+    "final_val_loss": 3.141257,
+    "run_tag": "cpu_len256_seed42",
+    "walltime_sec": 249.486
+  },
+  {
+    "avg_fp_iters": 5.25,
+    "best_val_acc": 0.89,
+    "best_val_acc_postwarm": 0.86,
+    "final_val_loss": 3.162732,
+    "run_tag": "cpu_len256_seed43",
+    "walltime_sec": 249.234
+  },
+  {
+    "avg_fp_iters": 5.25,
+    "best_val_acc": 0.93,
+    "best_val_acc_postwarm": 0.925,
+    "final_val_loss": 3.129225,
+    "run_tag": "cpu_len256_seed44",
+    "walltime_sec": 262.469
+  }
+]

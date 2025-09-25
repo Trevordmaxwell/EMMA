@@ -1,0 +1,5 @@
+# Optional; if these fail on your platform, you can skip and use the built-in solver.
+torchdeq>=0.3.0
+torchdiffeq>=0.2.3
+# CUDA-only (do not install on Mac/CPU):
+mamba-ssm>=1.0.0

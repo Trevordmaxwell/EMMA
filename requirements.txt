@@ -1,0 +1,7 @@
+numpy>=1.24
+pyyaml>=6.0
+tqdm>=4.66
+rich>=13.7
+matplotlib>=3.8
+# Install PyTorch separately via pip; macOS wheels include MPS by default in recent versions.
+torch>=2.2

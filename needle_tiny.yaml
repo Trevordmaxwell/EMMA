@@ -1,0 +1,22 @@
+seed: 42
+
+data:
+  num_values: 32
+  vocab_extra: 64
+  length: 256
+  train_size: 2000
+  val_size: 200
+
+model:
+  emb_dim: 64
+  hid_dim: 96
+  mem_dim: 512
+
+memory:
+  n_slots: 256
+  k_top: 16
+
+train:
+  batch_size: 32
+  lr: 0.003
+  epochs: 3

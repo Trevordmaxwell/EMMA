@@ -1,0 +1,18 @@
+{
+  "avg_fp_iters": 5.142857142857143,
+  "best_val_acc": 0.96875,
+  "best_val_acc_postwarm": 0.96875,
+  "delta_post_vs_pre": -0.046875,
+  "early_stop_epoch": null,
+  "final_val_loss": 0.711539551615715,
+  "gate_open_epoch": 7,
+  "gate_success": false,
+  "nce_ema_write_cos": 0.40013874854787734,
+  "nce_gate_epoch": 7,
+  "nce_gate_reason": "read",
+  "nce_lambda_last": 0.001,
+  "nce_read_ema_cos": 0.7308574014552622,
+  "post_gate_best_acc": 0.921875,
+  "pre_gate_best_acc": 0.96875,
+  "walltime_sec": 4219.284177375026
+}

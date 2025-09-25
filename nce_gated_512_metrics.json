@@ -1,0 +1,18 @@
+{
+  "aux_nce_loss_epoch_mean": 0.018386,
+  "avg_fp_iters": 5.5,
+  "best_val_acc": 0.91,
+  "best_val_acc_postwarm": 0.905,
+  "deq_last_residual": 3.515625,
+  "final_val_loss": 2.205264,
+  "gate_state_after": 1.0,
+  "gate_state_before": 1.0,
+  "lambda_nce_current_epoch": 0.1,
+  "lambda_nce_in_train": 0.1,
+  "nce_ema_write_cos": -0.000376,
+  "nce_gate_epoch": 2.0,
+  "nce_lambda_last": 0.1,
+  "nce_read_ema_cos": 0.418608,
+  "nce_temperature": 0.1,
+  "walltime_sec": 2926.664
+}

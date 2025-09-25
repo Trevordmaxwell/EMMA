@@ -1,0 +1,101 @@
+seed: 42
+data:
+  decouple_kv: true
+  length: 768
+  n_pairs: 4
+  num_values: 64
+  train_size: 384
+  val_size: 64
+  vocab_extra: 96
+model:
+  emb_dim: 64
+  hid_dim: 128
+  mem_dim: 512
+memory:
+  n_slots: 768
+  k_top: 16
+  bucket_count: 64
+  write_decay: 0.99
+  write_strength: 0.5
+  write_norm_clip: 0.5
+  write_strength_schedule:
+    mult_after_open: 1.15
+    steps: 3
+  load_balance_coeff: 0.001
+train:
+  batch_size: 8
+  lr: 0.0018
+  wd: 0.01
+  epochs: 10
+  lr_after_warm_factor: 0.65
+  lr_warm_restart_factor: 0.5
+  lr_warm_restart_epochs: 3
+emma:
+  deq_max_iter: 6
+  oracle_write: false
+  warm_start_epochs: 3
+  oracle_mix_ramp_epochs: 5
+  oracle_mix_min: 0.5
+  oracle_mix_post_gate_epochs: 3
+  oracle_mix_post_gate_min: 0.35
+  oracle_mix_post_gate_start: 0.6
+  mem_into_deq: true
+  mem_scale: 0.6
+  mem_scale_min: 0.0
+  logit_scale_max: 5.0
+  max_writes_per_seq: 5
+  value_dropout: 0.05
+  nce_temperature: 0.1
+  nce_gate_start_epoch: 6
+  nce_gate_plateau_epochs: 2
+  nce_gate_plateau_eps: 0.01
+  nce_gate_allow_plateau: true
+  nce_gate_require_read: true
+  nce_gate_require_plateau: false
+  nce_gate_read_threshold: 0.63
+  nce_gate_read_patience: 1
+  nce_gate_warmup_epochs: 6
+  nce_lambda_floor: 0.001
+  nce_lambda_increment: 0.001
+  nce_lambda_end: 0.02
+  nce_lambda_max: 0.02
+  nce_lambda_backoff: 0.6
+  nce_lambda_ramp_epochs: 6
+  nce_lambda_pause_below_read: true
+  nce_lambda_freeze_epochs_after_open: 1
+  nce_read_target: 0.66
+  nce_read_hysteresis: 0.02
+  nce_post_gate_drop_threshold: 0.03
+  nce_post_gate_drop_patience: 2
+  nce_force_open_epoch: 0
+  nce_min_open_epochs: 1
+  nce_sticky_after_ramp: false
+  nce_ema_beta: 0.8
+  nce_read_ema_beta: 0.8
+  spectral_norm_keys: true
+  post_gate_write_cooldown_batches: 2
+  read_cleanup_topk: 3
+  enable_read_cleanup: true
+loss:
+  lambda_pred_ce: 0.3
+  lambda_write_cos: 0.2
+  lambda_write_nce: 0.1
+  info_nce_lambda:
+    start: 0.0
+    end: 0.02
+    max: 0.02
+    epochs: 5
+    ema_alpha: 0.3
+reg:
+  addr_entropy_weight: 0.01
+read:
+  cleanup_mode: softmax
+  cleanup_temp: 0.7
+  sharpen_topk: 2
+  sharpen_temp: 0.8
+  sharpen_mask_margin: 5.0
+  cleanup_blend:
+    raw: 0.7
+    cleanup: 0.3
+logging:
+  per_epoch_extended: true

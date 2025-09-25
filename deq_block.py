@@ -2,6 +2,7 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils.parametrizations import spectral_norm
 
 try:
     import torchdeq
@@ -36,12 +37,18 @@ def _coerce_to_tensor(maybe):
         raise TypeError("Could not coerce DEQ return value to torch.Tensor")
 
 class ResidualUpdate(nn.Module):
-    def __init__(self, dim_z: int, dim_x: int, dim_v: int, hidden: int = 128):
+    def __init__(self, dim_z: int, dim_x: int, dim_v: int, hidden: int = 128, use_spectral_norm: bool = True):
         super().__init__()
-        self.lin1 = nn.Linear(dim_z + dim_x + dim_v, hidden)
-        self.lin2 = nn.Linear(hidden, dim_z)
-        nn.init.xavier_uniform_(self.lin1.weight)
-        nn.init.xavier_uniform_(self.lin2.weight)
+        lin1 = nn.Linear(dim_z + dim_x + dim_v, hidden)
+        lin2 = nn.Linear(hidden, dim_z)
+        nn.init.xavier_uniform_(lin1.weight)
+        nn.init.xavier_uniform_(lin2.weight)
+        if use_spectral_norm:
+            self.lin1 = spectral_norm(lin1)
+            self.lin2 = spectral_norm(lin2)
+        else:
+            self.lin1 = lin1
+            self.lin2 = lin2
 
     def forward(self, z: torch.Tensor, x: torch.Tensor, v: torch.Tensor) -> torch.Tensor:
         inp = torch.cat([z, x, v], dim=-1)
@@ -125,14 +132,20 @@ class FixedPointBlock(nn.Module):
         # Fallback iterative solver (Picard with relaxation)
         z = z0
         iters = 0
+        last_res = None
         with torch.enable_grad():
             for k in range(self.max_iter):
                 z_next = self.updater(z, x, v)
                 z_new = (1.0 - self.relax) * z + self.relax * z_next
-                if torch.max(torch.abs(z_new - z)).item() < self.tol:
+                last_res = torch.max(torch.abs(z_new - z))
+                if last_res.item() < self.tol:
                     z = z_new
                     iters = k + 1
                     break
                 z = z_new
                 iters = k + 1
+        try:
+            self._last_residual = float(last_res.item()) if last_res is not None else float('nan')
+        except Exception:
+            self._last_residual = float('nan')
         return z, iters

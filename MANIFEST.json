@@ -1,0 +1,190 @@
+{
+  "created_at": "20250920_204127",
+  "files": [
+    {
+      "path": "configs/cpu_len1024_nceA.yaml",
+      "bytes": 905,
+      "sha256": "1918c0479010d8abb15c6b4f6d6c3363fa425aea282629be8cf4f5985b137175"
+    },
+    {
+      "path": "configs/cpu_len2048_nceA.yaml",
+      "bytes": 906,
+      "sha256": "75a2cfa7be36961aac725e964a37f3bfa0ffdeed7aabc982645596dd756101e0"
+    },
+    {
+      "path": "configs/cpu_len256.yaml",
+      "bytes": 614,
+      "sha256": "4a8e150aa5f2e1e33f84dca3149a35c1d12c89edb828b44d3ad4fd63480fecc7"
+    },
+    {
+      "path": "configs/cpu_len256_nceA.yaml",
+      "bytes": 902,
+      "sha256": "8f7561683728a72087117894fa09ea91391d5adcddfc50dadf35d2a92df499c8"
+    },
+    {
+      "path": "configs/cpu_len256_nceB.yaml",
+      "bytes": 879,
+      "sha256": "6f3698e09cb97ba197988bea8688c4d0904ae36d00a458d507b14836fe29c8df"
+    },
+    {
+      "path": "configs/cpu_len256_nce_force_open.yaml",
+      "bytes": 918,
+      "sha256": "e44d75909ae249040d31d974edddd3debf63adfcd9f4b689f842f01303f0c8a4"
+    },
+    {
+      "path": "configs/cpu_len256_oracle40.yaml",
+      "bytes": 614,
+      "sha256": "8d39718f95d1d4f3276f01b5044513eda2a3e16f5d067980ac36b1fc2596cadf"
+    },
+    {
+      "path": "configs/cpu_len512_n4_nceA.yaml",
+      "bytes": 903,
+      "sha256": "26f20729b97787113ea3be05f8faf4ec297d5e9f51bf880e060b86c1b0fba75f"
+    },
+    {
+      "path": "configs/cpu_len512_nceA.yaml",
+      "bytes": 903,
+      "sha256": "53852bde47783b0b5f227dc2b84e633c43586866277d77a4c5a1d1f95bbcf3d2"
+    },
+    {
+      "path": "configs/len512_fast.yaml",
+      "bytes": 615,
+      "sha256": "87047c91baf3224f7682352fb170bdebfffb568f95efd9b54fa693929870b9b7"
+    },
+    {
+      "path": "configs/listops_lite_len512_cpu.yaml",
+      "bytes": 567,
+      "sha256": "5148663e1ebe8a29f485fc3579cb078425eac4d8eae725471663b244ee53b7f2"
+    },
+    {
+      "path": "emma/__init__.py",
+      "bytes": 24,
+      "sha256": "4851a7835d19b5ab964af5865001fc1449215a546f22190267c5189776b8ef28"
+    },
+    {
+      "path": "emma/data.py",
+      "bytes": 8362,
+      "sha256": "95f8a60fc3a6106c1e1ecaf4798861247e2d579bb0cfaf352f00ebb9eb3689cc"
+    },
+    {
+      "path": "emma/model.py",
+      "bytes": 13739,
+      "sha256": "b22f4968971d320f742ecc3d4a0d3d562b5506df9fa30a6a8e3d4b9acc076ce5"
+    },
+    {
+      "path": "emma/modules/deq_block.py",
+      "bytes": 6019,
+      "sha256": "26ff188addfbd3a254de2f011dc0102084ef921babcd2d62ad5b8d4a63cca744"
+    },
+    {
+      "path": "emma/modules/liquid_cell.py",
+      "bytes": 1777,
+      "sha256": "be11f875490437f40250ef37eeed2078f6c8bf6d643bda3ab6048102e7a18248"
+    },
+    {
+      "path": "emma/modules/vsa_memory.py",
+      "bytes": 3851,
+      "sha256": "236daca9b9272b4493947154a7e1da9e0c89a846ced39daba87e279c1ad6b654"
+    },
+    {
+      "path": "emma/train.py",
+      "bytes": 36803,
+      "sha256": "ed6e1f0e4223558d9a15b38a881ee288f79954c5084e705a5e7a0d80be3cfa66"
+    },
+    {
+      "path": "emma/utils.py",
+      "bytes": 2180,
+      "sha256": "930cc3fdc8391a07d8be52ec15caa4ed86d91532bd0c595689d61bf35f098171"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 60,
+      "sha256": "37ae7b23e0a020126bc0c82f459bb5472c947ccdcf42ecfaba1feb45fae5abcb"
+    },
+    {
+      "path": "experiments/results/listops_lite_len512_metrics.json",
+      "bytes": 141,
+      "sha256": "f1b9c0898934be7ce8477d7ee11c5928cd6d2db3a872c81edd6d97e65dd68e5d"
+    },
+    {
+      "path": "experiments/results/nce_force_open_metrics.json",
+      "bytes": 469,
+      "sha256": "465d3343d8500ef27163f9a0f33e07d654a422acc9feb0d3651a43e43005d2a3"
+    },
+    {
+      "path": "experiments/results/nce_gated_1024_metrics.json",
+      "bytes": 476,
+      "sha256": "fcae761bea35010021925e4beb35ad4d84fcaf665464cb60a89336451be3ded3"
+    },
+    {
+      "path": "experiments/results/nce_gated_512_metrics.json",
+      "bytes": 476,
+      "sha256": "03fba1fe7d01cbba2dacfd88b038b0f57fba8245dcd98453bb7146b60e164fce"
+    },
+    {
+      "path": "experiments/results/nce_gated_len512_n4_metrics.json",
+      "bytes": 474,
+      "sha256": "5771909542c43d073d63c7a8238d0782ffe5fc9b3210e80c85073e5e03336fca"
+    },
+    {
+      "path": "experiments/results/nce_gated_metrics.json",
+      "bytes": 499,
+      "sha256": "4163095db6c082736fc60927b0df7c51ef92cc70feabff9fd97462eacf3dad7b"
+    },
+    {
+      "path": "experiments/runs/nce_force_open/per_epoch.csv",
+      "bytes": 304,
+      "sha256": "78cf077175997d99b6268b005736fb576c6110ec13a2719c09375c05e6f60fa0"
+    },
+    {
+      "path": "experiments/runs/nce_force_open/train.log",
+      "bytes": 984,
+      "sha256": "794afb1a60f1b9cb70b2aeb318bb2d8fc1600a2459fdce35580efe60555be267"
+    },
+    {
+      "path": "experiments/runs/nce_gated/per_epoch.csv",
+      "bytes": 909,
+      "sha256": "cac644de152452181e9a5f41d0a21aa48f46263da100b4c11f21dd7b9d74c067"
+    },
+    {
+      "path": "experiments/runs/nce_gated/train.log",
+      "bytes": 2404,
+      "sha256": "8973cf6ae0fd629604d0cff18fe02241456990edde1ee8812ee6f3a3cac3e834"
+    },
+    {
+      "path": "experiments/runs/nce_gated_512/per_epoch.csv",
+      "bytes": 909,
+      "sha256": "042049e6f92779c9a6153dc41e0955a896ff2be60a6bc1ec095c6f17074e0238"
+    },
+    {
+      "path": "experiments/runs/nce_gated_512/train.log",
+      "bytes": 2261,
+      "sha256": "6c22591e8ab1c7ad5a60d9b412ed0e68ce6262e5f1d18fbf4fe47fc42050eeb8"
+    },
+    {
+      "path": "experiments/runs/nce_gated_len512_n4/per_epoch.csv",
+      "bytes": 910,
+      "sha256": "43ef30d522e88e29a6de948058629a77ae8890f7f3953562c2ea49a8d57a3d8f"
+    },
+    {
+      "path": "experiments/runs/nce_gated_len512_n4/train.log",
+      "bytes": 4522,
+      "sha256": "8af532737c175e406d04e65477a8a4c6478321d4ec67a49e76d35d5bd87bb77e"
+    },
+    {
+      "path": "docs/environment/system_info.txt",
+      "bytes": 6147,
+      "sha256": "3ffc55e1856b48c06a31adb86409e7a46149267f727079936c3cca05e80a4e45"
+    },
+    {
+      "path": "docs/environment/diagnostics.json",
+      "bytes": 10564,
+      "sha256": "15f55b0efe0609192fb2cf817aee1c3d9c17bd21e0b99c7a05399641d54e059e"
+    },
+    {
+      "path": "docs/environment/diagnostics.txt",
+      "bytes": 138,
+      "sha256": "a614f29daa8734795d73766d3fce64a9203fad69ae100bc174e8f915ab290d7d"
+    }
+  ]
+}

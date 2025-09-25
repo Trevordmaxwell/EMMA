@@ -1,0 +1,7 @@
+{
+  "avg_fp_iters": 6.0,
+  "best_val_acc": 0.945,
+  "best_val_acc_postwarm": 0.945,
+  "final_val_loss": 0.734583,
+  "walltime_sec": 3400.07
+}

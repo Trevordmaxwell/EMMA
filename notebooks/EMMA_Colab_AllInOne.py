@@ -2264,8 +2264,8 @@ GPU_LOCK = threading.Lock()  # serialize GPU forwards, keep CPU precompute in pa
 def run_probes(args, outdir: Path):
     require_gpu_or_fail("probes")
     import torch
-    from src.data.needle import make_dataloaders
-    from src.models.emma import EMMA
+    from emma.data import make_dataloaders
+    from emma.model import EMMA
 
     # model dims (lightweight but realistic)
     emb_dim = 48; hid_dim = 64; mem_dim = 256

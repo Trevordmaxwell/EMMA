@@ -1,6 +1,6 @@
 from __future__ import annotations
 import torch
-from src.modules.deq_block import ResidualUpdate, FixedPointBlock
+from emma.modules.deq_block import ResidualUpdate, FixedPointBlock
 
 def main():
     torch.manual_seed(0)

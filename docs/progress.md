@@ -10,7 +10,7 @@ _Last updated: 2025-09-24_
 - Extended to 10 epochs (`len768_guard_guarded_n4_long` with early-stop guard): gate stayed in band (`gate_open_fraction=0.30`) but the run tripped the post-gate drop alarm at epoch 8 once the λ freeze lifted (`raw_read_cos≈0.66`, val_acc 0.922), so plan to retry with `info_nce_lambda.increment=0.0005` (or an extra cooldown epoch) before scaling length.
 - Tried slower ramp (`len768_guard_guarded_n4_long_lambda0005`, `nce_lambda_increment=5e-4` override); gate dynamics unchanged (open fraction still 0.30) and the post-freeze drop reappeared at epoch 8 (val_acc 0.922, raw read cos 0.66). Next mitigation: add a second cooldown epoch and/or extend the LR warm-restart window before moving to len1024.
 - Added second cooldown (`post_gate_write_cooldown_batches=2`) and lengthened LR restart window (3 epochs). Long run still tripped the drop guard at epoch 8 (`len768_guard_guarded_n4_long_cooldown2`), so the next knob to try is extending `nce_lambda_freeze_epochs_after_open` or trimming the post-gate ramp before cloning to len1024.
-- Restructured workspace into `src/`, `configs/`, `scripts/`, `experiments/`, `docs/`, and `legacy/`.
+- Restructured workspace into `emma/`, `configs/`, `scripts/`, `experiments/`, `docs/`, and `legacy/`.
 - Added opt-in gating safeguards (`nce_gate_require_read`, `nce_gate_read_patience`, `nce_lambda_pause_below_read`) and post-gate oracle mix ramp controls so quick sweeps stay stable while new profiles can demand read readiness.
 - Extended telemetry capture behind `logging.per_epoch_extended` to log train-time read/write cosine spread and bucket coverage in `per_epoch.csv`.
 - Added plateau-aware NCE gating (`nce_gate_require_plateau`), collision telemetry, and per-write HRR renorm so throttled runs stay stable when the gate opens.
@@ -22,12 +22,12 @@ _Last updated: 2025-09-24_
 - Relaxed the guard slightly (`nce_gate_read_threshold=0.68`, `nce_lambda_increment=0.001`, cooldown=1, β=0.5); gate opened at epoch 7, val acc finished at 0.938 (same Δ≈‑0.031 as baseline) and raw→clean gap stayed ~0.02 (`len768_guard_guarded`).
 - Consolidated active training scripts under `scripts/` with shared venv + `PYTHONPATH` handling.
 - Archived audit bundles, desktop launchers, and older repos into `legacy/` for reference.
-- Centralized documentation index (`docs/README.md`) and migrated reports into `docs/reports/`.
-- Documented the architecture flow and references in `docs/architecture.md`; regenerated Graphviz/PNG assets under `docs/figures/`.
-- Extracted InfoNCE gating/oracle mix policy into `NCEScheduler` (`src/emma/schedules.py`) and simplified the trainer.
+- Centralized documentation index (`docs/README.md`) and migrated reports into `docs/`.
+- Documented the architecture flow and references in `docs/architecture.md`; regenerated Graphviz/LaTeX assets under `docs/diagrams/`.
+- Extracted InfoNCE gating/oracle mix policy into `NCEScheduler` (`emma/schedules.py`) and simplified the trainer.
 - Added smoke tests for memory reset, training loop, and scheduler behavior (`tests/`).
 - Introduced `scripts/run_training.py` for config overrides + run logging automation.
-- Validated the new launcher with `demo_cpu_len256_quick` (one epoch, probes preset); metrics saved under `experiments/results/demo_cpu_len256_quick_metrics.json`.
+- Validated the new launcher with `demo_cpu_len256_quick` (one epoch, probes preset); metrics saved under `experiments/metrics/demo_cpu_len256_quick_metrics.json`.
 - Added read sharpening (top-k + temperature) controllable via `read.sharpen_*` config knobs.
 - Introduced `emma.spectral_norm_keys` to stabilize key/value heads alongside existing DEQ spectral norm.
 - Added optional softmax-based cleanup (`read.cleanup_mode=softmax`, `read.cleanup_temp`) for prototype snapping.
@@ -35,8 +35,8 @@ _Last updated: 2025-09-24_
   - Len256: softmax-only (`val_acc=0.859`, loss 2.32) vs. top-2 (`0.859`, 1.21) / top-4 (`0.859`, 1.33`).
   - Len512: baseline (`val_acc=0.906`, loss 2.31) vs. top-2 (`0.906`, 1.20) / top-4 (`0.906`, 1.15`).
   - Len1024: baseline (`val_acc=0.906`, loss 2.26) vs. top-2 (`0.906`, 0.84) / top-4 (`0.906`, 0.94`).
-  Metrics in `experiments/results/cpu_len256_softmax_*_metrics.json`, `cpu_len512_softmax_*_metrics.json`, and `cpu_len1024_softmax_*_metrics.json`.
-- Added `scripts/run_adaptive_lambda_sweep.py` (quickstart-backed λ grid) plus a len512 quickstart preset; targeted adaptive sweeps now log under `experiments/runs/adaptive_*`. Len256 quick runs kept λ closed (short warmup), while len512 opened at epoch 3 with λ≈0.003 but slipped post-gate (val 0.906→0.859, loss 1.20).
+  Metrics in `experiments/metrics/cpu_len256_softmax_*_metrics.json`, `experiments/metrics/cpu_len512_softmax_*_metrics.json`, and `experiments/metrics/cpu_len1024_softmax_*_metrics.json`.
+- Added `scripts/run_adaptive_lambda_sweep.py` (quickstart-backed λ grid) plus a len512 quickstart preset; targeted adaptive sweeps now log under `experiments/logs/adaptive_*`. Len256 quick runs kept λ closed (short warmup), while len512 opened at epoch 3 with λ≈0.003 but slipped post-gate (val 0.906→0.859, loss 1.20).
 - Extended the len256 sweep to 5 epochs with a shortened warm-start; λ opened by epoch 3 (≈0.003→0.005) but val loss ballooned to ~3.37 as read_ema hit 0.47. Completed the remaining len512/len1024 grid points: len512 still opens at epoch 3 and falls back to 0.859 post-gate, while len1024 never leaves warm-start and matches the softmax baseline.
 - Len256 tune: four-epoch run with λ capped at 1e-3 kept the gate closed until epoch 4, held best acc 0.875, and dropped final loss to ~1.08 (read_ema ≈0.51).
 - Len512 quickstart update: delaying the gate (start≥5) and trimming to two epochs preserves the 0.906 acc / 0.84 loss baseline while skipping the post-open slump; reserve λ sweeps for longer schedules.
@@ -53,7 +53,7 @@ _Last updated: 2025-09-24_
 | `cpu_len512_nceA.yaml` | Needle, L=512 | Strict micro-runs; requires patience on CPU, best with gating.
 | `listops_lite_len512_cpu.yaml` | ListOps-lite | Uses `forward_classify`, warm-start + mix floor for stability.
 
-Metrics for historical sweeps live under `experiments/results/`; raw logs in `experiments/runs/`.
+Metrics for historical sweeps live under `experiments/metrics/`; raw logs in `experiments/logs/` with plots under `experiments/plots/`.
 
 ## Open Questions / Next Steps
 1. Regenerate architecture diagrams (`emma_architecture_graphviz_v3.dot` → PDFs) to include scheduler abstractions.

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import torch
-from src.modules.vsa_memory import VSAMemory, _normalize, hrr_bind, hrr_unbind
+from emma.modules.vsa_memory import VSAMemory, _normalize, hrr_bind, hrr_unbind
 
 def main():
     D = 512

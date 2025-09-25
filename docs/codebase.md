@@ -1,4 +1,4 @@
-# Codebase Notes (`src/emma`)
+# Codebase Notes (`emma`)
 
 ## Package Layout
 - `emma/model.py` — EMMA core model combining embedding, DEQ block, Liquid cell, and VSA memory.
@@ -10,12 +10,12 @@
 ## Running Locally
 - Use `./scripts/run_cpu_256.command` for the standard Needle (L=256) benchmark.
 - Use `./scripts/run_cpu_listops_512.command` for the ListOps-lite classification sanity check.
-- Quick CPU presets: configs in `configs/quickstarts/len{256,512,1024}_softmax_top{2,4}.yaml` mirror the latest sweeps.
-- For custom sweeps, run `python scripts/run_training.py --config <yaml> --preset configs/presets/probes_full.yaml --set train.lr=0.002` to merge presets/overrides and launch runs inside `experiments/runs/` (supports `--dry-run`).
+- Quick CPU presets: use the `configs/cpu_len*.yaml` variants that mirror the latest sweeps.
+- For custom sweeps, run `python scripts/run_training.py --config <yaml> --set train.lr=0.002` to merge overrides and launch runs inside `experiments/logs/` with metrics in `experiments/metrics/` (supports `--dry-run`).
 - Both scripts:
   - Create/share `.venv_emma` at the repo root.
   - Install deps from `requirements.txt` and ensure `torch` CPU wheel is available.
-  - Set `PYTHONPATH=src` so imports resolve.
+  - Set `PYTHONPATH="$PWD"` so the `emma` package resolves.
 
 ### Read sharpening knobs
 - `read.sharpen_topk`: integer K; retains the top-K logits (others are downshifted by `read.sharpen_mask_margin`).
@@ -28,7 +28,7 @@
 - `emma.spectral_norm_keys`: apply spectral norm to the value/key projection heads (pairs with the DEQ residual spectral norm setting).
 - `read.cleanup_mode`: `nearest` (default) averages top-k prototypes; `softmax`/`hopfield` applies softmax weighting for a learned cleanup.
 - `read.cleanup_temp`: softmax temperature when cleanup mode is softmax.
-  - Write logs/metrics into `experiments/runs` and `experiments/results`.
+  - Write logs to `experiments/logs/` and metrics/plots under `experiments/metrics` + `experiments/plots`.
 
 ## Key Training Knobs
 Defined in `configs/*.yaml`:

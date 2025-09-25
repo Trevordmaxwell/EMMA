@@ -4,9 +4,9 @@ from typing import Optional
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.modules.vsa_memory import VSAMemory, _normalize
-from src.modules.deq_block import ResidualUpdate, FixedPointBlock
-from src.modules.liquid_cell import LiquidCell
+from emma.modules.vsa_memory import VSAMemory, _normalize
+from emma.modules.deq_block import ResidualUpdate, FixedPointBlock
+from emma.modules.liquid_cell import LiquidCell
 
 class EMMA(nn.Module):
     """

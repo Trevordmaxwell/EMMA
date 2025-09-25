@@ -3,9 +3,9 @@
 This document captures the current EMMA (Equilibrium + Memory + Minimal Liquid) dataflow and supporting components.
 
 ## Visual References
-- `docs/figures/emma_architecture_graphviz_v3.pdf` — authoritative block diagram regenerated via Graphviz (`docs/figures/src/emma_architecture_graphviz_v3.dot`).
-- `docs/figures/emma_architecture_v3.pdf` — LaTeX render suitable for publications (`docs/figures/src/emma_architecture_v3.tex`).
-- Regenerate with `dot -Tpdf docs/figures/src/emma_architecture_graphviz_v3.dot -o docs/figures/emma_architecture_graphviz_v3.pdf` (add `-Tpng` for previews). If LaTeX is available, rebuild `emma_architecture_v3.pdf` using `pdflatex` and place outputs back into `docs/figures/`.
+- `docs/diagrams/emma_architecture_graphviz_v3.pdf` — authoritative block diagram regenerated via Graphviz (`docs/diagrams/emma_architecture_graphviz_v3.dot`).
+- `docs/diagrams/emma_architecture_v3.pdf` — LaTeX render suitable for publications (`docs/diagrams/emma_architecture_v3.tex`).
+- Regenerate with `dot -Tpdf docs/diagrams/emma_architecture_graphviz_v3.dot -o docs/diagrams/emma_architecture_graphviz_v3.pdf` (add `-Tpng` for previews). If LaTeX is available, rebuild `emma_architecture_v3.pdf` using `pdflatex` and place outputs back into `docs/diagrams/`.
 
 ## Core Pipeline
 1. **Embedding**: tokens → learned embeddings.
@@ -22,8 +22,8 @@ This document captures the current EMMA (Equilibrium + Memory + Minimal Liquid) 
 - Key metrics: `write_cos`, `read_cos`, bucket entropy, write coverage, read cleanup cosine.
 
 ## Training Loop Highlights
-- `src/emma/train.py` orchestrates training via YAML configs, supporting auxiliary CE, cosine, InfoNCE losses, and optional regularizers.
-- **NCEScheduler** (`src/emma/schedules.py`) owns InfoNCE gate/oracle-hold policy; each epoch the trainer requests a decision (lambda value, gate state, plateau/read readiness). Optional knobs can now require sustained read readiness before opening and freeze λ back to the floor when alignment slips.
+- `emma/train.py` orchestrates training via YAML configs, supporting auxiliary CE, cosine, InfoNCE losses, and optional regularizers.
+- **NCEScheduler** (`emma/schedules.py`) owns InfoNCE gate/oracle-hold policy; each epoch the trainer requests a decision (lambda value, gate state, plateau/read readiness). Optional knobs can now require sustained read readiness before opening and freeze λ back to the floor when alignment slips.
 - Warm-start teacher forcing, oracle mix schedules, and memory injection ramps execute after consulting the scheduler.
 - Tripwires (read/write cosine minima, residual norms, val-acc minimum) remain for safety and early exits.
 
@@ -31,7 +31,7 @@ This document captures the current EMMA (Equilibrium + Memory + Minimal Liquid) 
 - DEQ health: `avg_fp_iters`, `residual_norm`.
 - Memory health: `write_cos`, `read_cos`, `read_cos_raw`, `read_cleanup_cos`, bucket entropy, write bucket entropy, writes-per-seq.
 - Scheduler telemetry: `lambda_nce_current_epoch`, `gate_state_before/after`, `nce_open_steps`, `nce_read_ema_cos`, `nce_gate_epoch`.
-- Logs live under `experiments/runs/…`; summaries under `experiments/results/`.
+- Logs live under `experiments/logs/…`; metrics under `experiments/metrics/` (plots in `experiments/plots/`).
 
 ## Outstanding Work
 - Keep diagrams aligned with code — regenerate PDFs when architecture changes (new modules, GPU paths, etc.).

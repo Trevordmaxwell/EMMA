@@ -6,8 +6,8 @@
 - Extended logging/aggregation to track `write_gate_ratio`, `lift_off_epoch`, mix telemetry, and mem→DEQ gate behavior.
 
 ## Code References
-- `src/models/emma.py`: adaptive gating, mem→DEQ sigmoid gate, write metrics.
-- `src/train.py`: adaptive mix schedule, mix telemetry logging, KPI emission.
+- `emma/model.py`: adaptive gating, mem→DEQ sigmoid gate, write metrics.
+- `emma/train.py`: adaptive mix schedule, mix telemetry logging, KPI emission.
 - `aggregate_runs.py`, `run_stability_sweep.py`, `analyze_memory_health.py`: new metrics propagated to reports.
 - Config example: `configs/exp_adaptive.yaml`.
 

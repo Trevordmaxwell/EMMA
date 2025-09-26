@@ -1,8 +1,39 @@
+seed: 1337
+
 data:
-  train_size: 512
+  decouple_kv: true
+  length: 128
+  n_pairs: 1
+  num_values: 32
+  train_size: 384
   val_size: 64
+  vocab_extra: 32
+
+model:
+  emb_dim: 48
+  hid_dim: 96
+  mem_dim: 192
+
+memory:
+  n_slots: 128
+  k_top: 8
+  device: cpu  # set to "auto" or a device string (e.g., "cuda") to follow the trainer
+
 train:
-  epochs: 3
   batch_size: 16
+  lr: 0.003
+  wd: 0.0
+  epochs: 3
+  lr_after_warm_factor: 0.5
+
 emma:
-  deq_max_iter: 6
+  deq_max_iter: 4
+  oracle_write: false
+  warm_start_epochs: 1
+  mem_into_deq: false
+  logit_scale_max: 5.0
+
+loss:
+  lambda_pred_ce: 0.2
+  lambda_write_cos: 0.1
+  lambda_write_nce: 0.0

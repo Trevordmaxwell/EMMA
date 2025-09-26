@@ -44,7 +44,7 @@ class VSAMemory(nn.Module):
         self.bucket_count = max(1, min(int(bucket_count), n_slots))
         self.write_strength = float(write_strength) if write_strength is not None else 1.0
         self.bucket_temp = float(bucket_temp) if bucket_temp else 1.0
-        self.device = device if device is not None else torch.device('cpu')
+        self.device = torch.device(device) if device is not None else torch.device('cpu')
         self.write_norm_clip = None if write_norm_clip is None else float(write_norm_clip)
 
         with torch.no_grad():
@@ -61,11 +61,7 @@ class VSAMemory(nn.Module):
         bucket_ids = torch.arange(n_slots, device=self.device, dtype=torch.long) % self.bucket_count
         self.register_buffer('bucket_ids', bucket_ids)
         self._bucket_slot_index: list[torch.Tensor] = []
-        for b in range(self.bucket_count):
-            idx = torch.nonzero(bucket_ids == b, as_tuple=False).squeeze(-1)
-            if idx.numel() == 0:
-                idx = torch.tensor([b % n_slots], device=self.device, dtype=torch.long)
-            self._bucket_slot_index.append(idx)
+        self._rebuild_bucket_indices()
 
         self._write_trace: list[dict] = []
         self._read_trace: list[dict] = []
@@ -83,6 +79,28 @@ class VSAMemory(nn.Module):
         self._write_trace = []
         self._read_trace = []
         self._init_collision_trackers()
+
+    def _rebuild_bucket_indices(self) -> None:
+        self._bucket_slot_index = []
+        bucket_ids = self.bucket_ids
+        for b in range(self.bucket_count):
+            idx = torch.nonzero(bucket_ids == b, as_tuple=False).squeeze(-1)
+            if idx.numel() == 0:
+                idx = torch.tensor([b % self.n_slots], device=bucket_ids.device, dtype=torch.long)
+            self._bucket_slot_index.append(idx)
+
+    # type: ignore[override]
+    def to(self, *args, **kwargs):
+        device_arg = kwargs.get('device', None)
+        if device_arg is None and args:
+            candidate = args[0]
+            if isinstance(candidate, (torch.device, str, int)):
+                device_arg = candidate
+        result = super().to(*args, **kwargs)
+        if device_arg is not None:
+            self.device = torch.device(device_arg)
+            self._rebuild_bucket_indices()
+        return result
 
     def _hash_bucket(self, key: torch.Tensor) -> torch.Tensor:
         key_n = _normalize(key)

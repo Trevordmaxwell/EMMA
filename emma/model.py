@@ -47,6 +47,7 @@ class EMMA(nn.Module):
         cleanup_blend_raw: float | None = None,
         cleanup_blend_clean: float | None = None,
         write_norm_clip: float | None = None,
+        memory_device: str | torch.device | None = 'cpu',
     ):
         super().__init__()
         self.oracle_write = oracle_write
@@ -57,6 +58,7 @@ class EMMA(nn.Module):
         # Runtime knobs set by trainer
         self.oracle_mix_alpha: float = 0.0
         self.logit_scale_max: Optional[float] = None
+        self.memory_device = torch.device(memory_device) if memory_device is not None else torch.device('cpu')
 
         self.embed = nn.Embedding(vocab_size, emb_dim)
         self.key_embed = nn.Embedding(num_values, mem_dim)
@@ -84,6 +86,7 @@ class EMMA(nn.Module):
             bucket_count=bucket_count,
             write_strength=write_strength,
             bucket_temp=bucket_temp,
+            device=self.memory_device,
             write_norm_clip=write_norm_clip,
         )
         self.z_to_value = nn.Linear(hid_dim*2, mem_dim)
@@ -179,7 +182,7 @@ class EMMA(nn.Module):
         use_oracle = self.oracle_write
 
         self.memory.reset()
-        self.memory = self.memory.to('cpu')
+        self.memory.to(self.memory_device)
         h = self.h0.unsqueeze(0).expand(B, -1)
         z = torch.zeros(B, h.size(1), device=device)
 
@@ -224,7 +227,8 @@ class EMMA(nn.Module):
             if self.mem_into_deq and (t == query_pos).any():
                 mask_q = (t == query_pos)
                 v_read_local = torch.zeros(B, self.memory.dim, device=device)
-                mem_inject = self.memory.read(_normalize(key_vecs[mask_q]).detach().to('cpu')).to(device)
+                mem_keys = _normalize(key_vecs[mask_q]).detach().to(self.memory_device)
+                mem_inject = self.memory.read(mem_keys).to(device)
                 if self.enable_read_cleanup:
                     mem_inject, _, _ = self._cleanup_read(mem_inject, V_proto)
                 mem_inject = F.normalize(mem_inject, dim=-1)
@@ -304,10 +308,14 @@ class EMMA(nn.Module):
                         temp = float(getattr(self, 'nce_temperature', 0.1) or 0.1)
                         aux_nce = info_nce_loss(v_pred_bound, v_true_bound, temperature=temp)
                         aux_nce_loss = aux_nce_loss + aux_nce
-                # external memory write on CPU (optional disable during eval)
+                # external memory write (optional disable during eval)
                 if not disable_write:
-                    key_w = _normalize(key_vecs[allowed_mask]).detach().to('cpu')
-                    self.memory.write(key_w, v_write.detach().to('cpu'), seq_indices=seq_idx.detach().to('cpu'))
+                    key_w = _normalize(key_vecs[allowed_mask]).detach().to(self.memory_device)
+                    self.memory.write(
+                        key_w,
+                        v_write.detach().to(self.memory_device),
+                        seq_indices=seq_idx.detach().to(self.memory_device),
+                    )
                 if writes_remaining is not None:
                     writes_remaining[seq_idx] = torch.clamp(writes_remaining[seq_idx] - 1, min=0)
                 writes_executed[seq_idx] += 1.0
@@ -323,23 +331,23 @@ class EMMA(nn.Module):
                         perm = torch.randperm(kv.shape[0], device=kv.device)
                         kv = kv[perm]
                     v_mem_raw, bucket_ids, bucket_entropies, _ = self.memory.read(
-                        _normalize(kv).detach().to('cpu'),
+                        _normalize(kv).detach().to(self.memory_device),
                         return_info=True,
                     )
                 else:
                     v_mem_raw, bucket_ids, bucket_entropies, _ = self.memory.read(
-                        _normalize(key_vecs[mask_q]).detach().to('cpu'),
+                        _normalize(key_vecs[mask_q]).detach().to(self.memory_device),
                         return_info=True,
                     )
 
-                bucket_ids_cpu = bucket_ids.clone()
-                bucket_entropies_cpu = bucket_entropies.clone()
+                bucket_ids_cpu = bucket_ids.detach().to('cpu')
+                bucket_entropies_cpu = bucket_entropies.detach().to('cpu')
 
                 v_mem_raw = v_mem_raw.to(device)
-                bucket_entropies_device = bucket_entropies_cpu.to(device)
+                bucket_entropies_device = bucket_entropies.to(device)
                 bucket_entropy_sum = bucket_entropy_sum + bucket_entropies_device.sum()
-                bucket_entropy_count = bucket_entropy_count + bucket_entropies_cpu.numel()
-                bucket_ids_device = bucket_ids_cpu.to(device)
+                bucket_entropy_count = bucket_entropy_count + bucket_entropies.numel()
+                bucket_ids_device = bucket_ids.to(device)
                 if bucket_ids_device.numel() > 0 and bucket_usage.numel() >= bucket_ids_device.numel():
                     bucket_usage.index_add_(
                         0,
@@ -496,7 +504,7 @@ class EMMA(nn.Module):
         B, L = tokens.shape
         device = tokens.device
         self.memory.reset()
-        self.memory = self.memory.to('cpu')
+        self.memory.to(self.memory_device)
         h = self.h0.unsqueeze(0).expand(B, -1)
         z = torch.zeros(B, h.size(1), device=device)
 
@@ -540,14 +548,18 @@ class EMMA(nn.Module):
             else:
                 v_write = v_pred
 
-            # write with key from hidden state at step t (CPU buffer)
+            # write with key from hidden state at step t (external memory)
             k_t = _normalize(self.cls_key(h.detach()))
             seq_idx = torch.arange(B, device=device, dtype=torch.long)
-            self.memory.write(k_t.detach().to('cpu'), v_write.detach().to('cpu'), seq_indices=seq_idx.detach().to('cpu'))
+            self.memory.write(
+                k_t.detach().to(self.memory_device),
+                v_write.detach().to(self.memory_device),
+                seq_indices=seq_idx.detach().to(self.memory_device),
+            )
 
         # READ at EOS using key from final hidden
         k_read = _normalize(self.cls_key(h.detach()))
-        v_mem_raw = self.memory.read(k_read.detach().to('cpu')).to(device)
+        v_mem_raw = self.memory.read(k_read.detach().to(self.memory_device)).to(device)
         if self.enable_read_cleanup:
             v_mem_clean, v_mem_norm, cleanup_sim = self._cleanup_read(v_mem_raw, V_proto)
         else:
@@ -567,7 +579,7 @@ class EMMA(nn.Module):
 
         # addressing entropy at EOS
         try:
-            sims = self.memory.address_sims(k_read.detach().to('cpu'))
+            sims = self.memory.address_sims(k_read.detach().to(self.memory_device))
             p = torch.softmax(sims/1.0, dim=-1)
             ent = -(p * (p.clamp(min=1e-9).log())).sum(dim=-1)
             addr_ent = ent.mean().to(device)

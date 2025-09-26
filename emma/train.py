@@ -765,6 +765,12 @@ def main():
             cleanup_blend_raw = cleanup_blend_clean = None
     write_norm_clip = memory_cfg.get('write_norm_clip', None)
 
+    memory_device_cfg = memory_cfg.get('device', 'cpu')
+    if isinstance(memory_device_cfg, str) and memory_device_cfg.lower() == 'auto':
+        memory_device = device
+    else:
+        memory_device = memory_device_cfg
+
     model = EMMA(
         vocab_size=vocab_size,
         warm_start_epochs=cfg_emma.get('warm_start_epochs', 0),
@@ -788,6 +794,7 @@ def main():
         cleanup_blend_raw=cleanup_blend_raw,
         cleanup_blend_clean=cleanup_blend_clean,
         write_norm_clip=write_norm_clip,
+        memory_device=memory_device,
     )
     model.to(device)
 

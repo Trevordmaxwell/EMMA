@@ -9,14 +9,16 @@ Reorganized home for EMMA (Equilibrium + Memory + Minimal Liquid) research. The 
 - Explore additional configs under `configs/` and log results to `experiments/`.
 
 ## Repository Layout
-- `src/` — EMMA package (`emma/` modules, trainer, MANIFEST).
-- `configs/` — YAML configs for needle & ListOps-lite tasks.
-- `scripts/` — maintained entrypoints (`run_cpu_256.command`, `run_cpu_listops_512.command`).
-- `experiments/` — canonical runs (`runs/`), metrics (`results/`), audit artifacts.
-- `docs/` — onboarding, architecture notes, reports, figures, paper candidates.
-- `notebooks/` — Colab quickstarts and analysis notebooks.
-- `tools/` — lightweight maintenance scripts (e.g., cleanup helpers).
-- `legacy/` — archived bundles, old scripts, historical repos (kept read-only).
+- `emma/` — importable package with model code, data utilities, schedulers, and training loops.
+- `configs/` — YAML experiment definitions for needle, ListOps-lite, and CPU quick runs.
+- `scripts/` — maintained entrypoints (`run_cpu_256.command`, `run_training.py`, etc.).
+- `experiments/` — results organized into `metrics/`, `plots/`, and `logs/` for reproducibility.
+- `docs/` — onboarding, architecture notes, long-form reports, and diagram source files.
+- `notebooks/` — Colab quickstarts and exploratory analysis notebooks.
+- `tests/` — pytest suite covering DEQ blocks, schedules, memory reset, and smoke training loops.
+- `tools/` — lightweight maintenance helpers (e.g., evaluation placeholders).
+- `legacy/` — archived scripts and historical implementations kept read-only.
+- `EMMA_large_assets/` — oversized bundles preserved outside the main history.
 
 ## Workflow Hints
 1. Pick or duplicate a config from `configs/`, update metadata in `docs/progress.md`.

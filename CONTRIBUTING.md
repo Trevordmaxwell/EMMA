@@ -7,9 +7,9 @@ This workspace is tuned for quick iteration with continuity across users. To add
 - Install deps: `pip install -r requirements.txt` (PyTorch CPU wheels install automatically in the run scripts).
 
 ## 2. Code Changes
-- Source lives under `src/`. Keep new modules inside the `emma/` package unless they are utilities.
+- Source lives under `emma/`. Keep new modules inside that package unless they are true utilities.
 - Add configs in `configs/` and scripts in `scripts/` (only if they are reusable; one-offs belong in `legacy/`).
-- Log experiments to `experiments/runs/` and summarize insights in `docs/progress.md`.
+- Log experiments to `experiments/metrics/` (plus plots/logs) and summarize insights in `docs/progress.md`.
 
 ## 3. Tests
 - Lightweight smoke tests live in `tests/`.

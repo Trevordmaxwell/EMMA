@@ -24,7 +24,7 @@ Run each cell in order:
 
 1. Mount Google Drive.
 2. Review `Settings` and adjust:
-   - `BRANCH_OR_SHA` (your branch or commit)
+   - `BRANCH_OR_SHA` (defaults to `codex/colab-listops-sweep-handoff`; change if needed)
    - `SEEDS` (for example `60,61,62,63,64`)
    - `TRAIN_SIZE`, `VAL_SIZE`, `EPOCHS`
    - `RUN_PREFIX`

@@ -907,6 +907,16 @@ def main():
         base_lam_nce = loss_cfg.get('lambda_nce', 0.0)
     base_lam_nce = float(base_lam_nce or 0.0)
     warm_start_epochs = cfg.get('emma', {}).get('warm_start_epochs', 0)
+    train_cfg = cfg.get('train', {}) or {}
+    early_stop_patience = int(train_cfg.get('early_stop_patience', 0) or 0)
+    if early_stop_patience < 0:
+        early_stop_patience = 0
+    early_stop_min_delta = float(train_cfg.get('early_stop_min_delta', 0.0) or 0.0)
+    if early_stop_min_delta < 0.0:
+        early_stop_min_delta = 0.0
+    early_stop_start_epoch = int(train_cfg.get('early_stop_start_epoch', 1) or 1)
+    if early_stop_start_epoch < 1:
+        early_stop_start_epoch = 1
 
     lam_nce_schedule_cfg = loss_cfg.get('info_nce_lambda') or loss_cfg.get('lambda_nce_schedule')
     lam_nce_schedule = None
@@ -956,8 +966,12 @@ def main():
     delta_post_vs_pre = float('nan')
     gate_open_epoch_metric = None
     post_gate_drop_epochs = 0
+    generic_early_stop_bad_epochs = 0
+    generic_early_stop_best = float('nan')
     had_sustained_drop = False
     early_stop_epoch = None
+    early_stop_reason = None
+    checkpoint_path = str(Path(args.checkpoint).expanduser()) if args.checkpoint else None
 
     trip_cfg = emma_cfg.get('tripwire', {})
     trip_read_threshold = float(trip_cfg.get('read_cos_min', 0.5) or 0.5)
@@ -1319,38 +1333,49 @@ def main():
                         target = batch['target'].to(device)
                         logits, metrics = model.forward_classify(tokens, labels=target)
                         loss = criterion(logits, target)
-                    # Optional addressing entropy regularizer
-                    try:
-                        if addr_ent_w > 0.0:
-                            ae = metrics.get('addr_entropy', None)
-                            if ae is not None:
-                                loss = loss + addr_ent_w * float(ae)
-                    except Exception:
-                        pass
-                    # Optional self-distillation from deeper DEQ teacher
-                    if distill_enable and distill_weight > 0.0 and distill_teacher_deq > 0:
-                        saved_k = getattr(getattr(model, 'deq', None), 'max_iter', None)
+                        # Optional addressing entropy regularizer
                         try:
-                            if saved_k is not None:
-                                model.deq.max_iter = distill_teacher_deq
-                            with torch.no_grad():
-                                t_logits, _ = model.forward_classify(tokens, labels=target)
-                        finally:
+                            if addr_ent_w > 0.0:
+                                ae = metrics.get('addr_entropy', None)
+                                if ae is not None:
+                                    loss = loss + addr_ent_w * float(ae)
+                        except Exception:
+                            pass
+                        # Optional self-distillation from deeper DEQ teacher
+                        if distill_enable and distill_weight > 0.0 and distill_teacher_deq > 0:
+                            saved_k = getattr(getattr(model, 'deq', None), 'max_iter', None)
                             try:
                                 if saved_k is not None:
-                                    model.deq.max_iter = saved_k
-                            except Exception:
-                                pass
-                        t = distill_temp if distill_temp > 0 else 1.0
-                        log_p = torch.log_softmax(logits / t, dim=-1)
-                        q = torch.softmax(t_logits / t, dim=-1)
-                        kld = torch.sum(q * (torch.log(q.clamp_min(1e-9)) - log_p), dim=-1).mean()
-                        loss = loss + distill_weight * kld
-                        B = target.size(0); tot_loss += float(loss.item())*B; tot_acc += (logits.argmax(-1)==target).float().sum().item(); n+=B
+                                    model.deq.max_iter = distill_teacher_deq
+                                with torch.no_grad():
+                                    t_logits, _ = model.forward_classify(tokens, labels=target)
+                            finally:
+                                try:
+                                    if saved_k is not None:
+                                        model.deq.max_iter = saved_k
+                                except Exception:
+                                    pass
+                            t = distill_temp if distill_temp > 0 else 1.0
+                            log_p = torch.log_softmax(logits / t, dim=-1)
+                            q = torch.softmax(t_logits / t, dim=-1)
+                            kld = torch.sum(q * (torch.log(q.clamp_min(1e-9)) - log_p), dim=-1).mean()
+                            loss = loss + distill_weight * kld
+                        B = target.size(0)
+                        tot_loss += float(loss.item()) * B
+                        tot_acc += (logits.argmax(-1) == target).float().sum().item()
+                        n += B
                         try:
                             wc = metrics.get('write_cos', None)
-                            if wc==wc: write_cos_last = float(wc)
-                        except Exception: pass
+                            if wc is not None and wc == wc:
+                                write_cos_last = float(wc)
+                        except Exception:
+                            pass
+                        try:
+                            rc = metrics.get('read_cos', None)
+                            if rc is not None and rc == rc:
+                                read_cos_last = float(rc)
+                        except Exception:
+                            pass
                 return (
                     tot_loss / max(1, n),
                     tot_acc / max(1, n),
@@ -1469,6 +1494,8 @@ def main():
                 had_sustained_drop = True
                 if early_stop_epoch is None:
                     early_stop_epoch = epoch + 1
+                if early_stop_reason is None:
+                    early_stop_reason = 'nce_post_gate_drop'
                 rprint(
                     f"[early-stop] epoch={epoch+1} drop={drop:.3f} thresh={drop_threshold:.3f} "
                     f"patience={post_gate_drop_epochs}/{drop_patience}"
@@ -1477,6 +1504,31 @@ def main():
         elif lam_nce_used <= 0.0:
             post_gate_drop_epochs = 0
         logprint(f"METRIC post_gate_drop_epochs={post_gate_drop_epochs}")
+
+        if early_stop_patience > 0 and not stop_training and (va_acc == va_acc):
+            if math.isnan(generic_early_stop_best):
+                generic_early_stop_best = va_acc
+                generic_early_stop_bad_epochs = 0
+            else:
+                improvement = va_acc - generic_early_stop_best
+                if improvement > early_stop_min_delta:
+                    generic_early_stop_best = va_acc
+                    generic_early_stop_bad_epochs = 0
+                elif (epoch + 1) >= early_stop_start_epoch:
+                    generic_early_stop_bad_epochs += 1
+                    if generic_early_stop_bad_epochs >= early_stop_patience:
+                        if early_stop_epoch is None:
+                            early_stop_epoch = epoch + 1
+                        if early_stop_reason is None:
+                            early_stop_reason = 'generic_patience'
+                        rprint(
+                            f"[early-stop] epoch={epoch+1} no_improve={generic_early_stop_bad_epochs} "
+                            f"patience={early_stop_patience} min_delta={early_stop_min_delta:.4f}"
+                        )
+                        stop_training = True
+                else:
+                    generic_early_stop_bad_epochs = 0
+        logprint(f"METRIC generic_early_stop_bad_epochs={generic_early_stop_bad_epochs}")
 
         # Note: gate decisions for the next epoch will use the updated EMAs computed below
 
@@ -1586,16 +1638,16 @@ def main():
         if va_acc > best_val:
             best_val = va_acc
             best_epoch = epoch + 1
-            if args.checkpoint:
-                os.makedirs(os.path.dirname(args.checkpoint), exist_ok=True)
+            if checkpoint_path:
+                Path(checkpoint_path).parent.mkdir(parents=True, exist_ok=True)
                 torch.save({
                     'model_state_dict': model.state_dict(),
                     'epoch': best_epoch,
                     'best_val_acc': best_val,
                     'config': cfg,
                     'model_type': model_type,
-                }, args.checkpoint)
-                logprint(f"[checkpoint] saved best to {args.checkpoint}")
+                }, checkpoint_path)
+                logprint(f"[checkpoint] saved best to {checkpoint_path}")
         # Track post-warm best
         warm = cfg.get('emma', {}).get('warm_start_epochs', 0)
         if epoch >= warm and va_acc > best_val_postwarm:
@@ -1627,6 +1679,10 @@ def main():
     # Emit parse-friendly metrics
     avg_fp_overall = (sum(avg_fp_iters_running) / len(avg_fp_iters_running)) if avg_fp_iters_running else float('nan')
     logprint(f"METRIC best_val_acc={best_val:.6f}")
+    if best_epoch > 0:
+        logprint(f"METRIC best_epoch={int(best_epoch)}")
+    else:
+        logprint("METRIC best_epoch=nan")
     try:
         logprint(f"METRIC best_val_acc_postwarm={best_val_postwarm:.6f}")
     except Exception:
@@ -1669,6 +1725,14 @@ def main():
         logprint(f"METRIC early_stop_epoch={int(early_stop_epoch)}")
     else:
         logprint("METRIC early_stop_epoch=nan")
+    if early_stop_reason:
+        logprint(f"METRIC early_stop_reason={early_stop_reason}")
+    else:
+        logprint("METRIC early_stop_reason=none")
+    if checkpoint_path:
+        logprint(f"METRIC checkpoint_path={checkpoint_path}")
+    else:
+        logprint("METRIC checkpoint_path=none")
     logprint(f"METRIC walltime_sec={wall:.3f}")
     if gate_open_fraction == gate_open_fraction:
         logprint(f"METRIC gate_open_fraction={gate_open_fraction:.6f}")
@@ -1711,6 +1775,7 @@ def main():
 
     summary = {
         'best_val_acc': float(best_val) if best_val == best_val else None,
+        'best_epoch': int(best_epoch) if best_epoch > 0 else None,
         'best_val_acc_postwarm': float(best_val_postwarm) if best_val_postwarm == best_val_postwarm else None,
         'final_val_loss': float(final_val_loss) if final_val_loss == final_val_loss else None,
         'avg_fp_iters': float(avg_fp_overall) if avg_fp_overall == avg_fp_overall else None,
@@ -1725,6 +1790,8 @@ def main():
         'delta_post_vs_pre': float(delta_post_vs_pre) if not math.isnan(delta_post_vs_pre) else None,
         'gate_success': bool(gate_success) if gate_success is not None else None,
         'early_stop_epoch': int(early_stop_epoch) if early_stop_epoch is not None else None,
+        'early_stop_reason': early_stop_reason,
+        'checkpoint_path': checkpoint_path,
         'walltime_sec': float(wall),
         'gate_open_fraction': float(gate_open_fraction) if gate_open_fraction == gate_open_fraction else None,
     }

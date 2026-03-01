@@ -100,6 +100,7 @@ def main():
     parser.add_argument("--logfile", default=None, help="Override log path (default: run_dir/train.log).")
     parser.add_argument("--per-epoch-out", default=None, help="Override per-epoch CSV path.")
     parser.add_argument("--metrics-out", default=None, help="Override metrics JSON path.")
+    parser.add_argument("--checkpoint", default=None, help="Override best-checkpoint path (default: run_dir/best.ckpt.pt).")
     parser.add_argument("--sample-log", default=None, help="Base path for per-sample telemetry CSV (suffix _train/_val).")
     parser.add_argument("--sample-log-limit", type=int, default=0, help="Maximum rows to record per split for sample telemetry (0 disables).")
     args = parser.parse_args()
@@ -158,6 +159,13 @@ def main():
         metrics_path = DEFAULT_EXPERIMENT_DIR / "results" / f"{run_name}_metrics.json"
         metrics_path.parent.mkdir(parents=True, exist_ok=True)
 
+    if args.checkpoint:
+        checkpoint_path = Path(args.checkpoint)
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        checkpoint_path = run_dir / "best.ckpt.pt"
+        checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+
     sample_args: list[str] = []
     sample_limit = max(0, int(args.sample_log_limit or 0))
     if sample_limit > 0:
@@ -175,6 +183,7 @@ def main():
         "--logfile", str(log_path),
         "--per-epoch-out", str(per_epoch_path),
         "--metrics-out", str(metrics_path),
+        "--checkpoint", str(checkpoint_path),
     ])
     cmd.extend(sample_args)
     for extra in args.extra_arg:
